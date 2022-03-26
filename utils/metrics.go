@@ -20,14 +20,14 @@ var (
 			Name: "host_traffic_ingress_bytes",
 			Help: "Ingress Bytes received by the host.",
 		},
-		[]string{"remote_ip", "remote_port", "local_ip", "local_port"},
+		[]string{"remote_ip", "remote_port", "local_ip"},
 	)
 	HostTrafficEgressBytes = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "host_traffic_egress_bytes",
 			Help: "Egress Bytes received by the host.",
 		},
-		[]string{"remote_ip", "remote_port", "local_ip", "local_port"},
+		[]string{"remote_ip", "remote_port", "local_ip"},
 	)
 	MetricTrafficPackets = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
