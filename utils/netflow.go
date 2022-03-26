@@ -3,6 +3,8 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -224,6 +226,27 @@ func (s *StateNetFlow) DecodeFlow(msg interface{}) error {
 					"version": "9",
 				}).
 				Observe(float64(timeDiff))
+
+			if fmsg.FlowDirection == 0 {
+				HostTrafficEgressBytes.With(
+					prometheus.Labels{
+						"remote_ip":   net.IP(fmsg.DstAddr).String(),
+						"remote_port": fmt.Sprintf("%v", fmsg.DstPort),
+						"local_ip":    net.IP(fmsg.SrcAddr).String(),
+						"local_port":  fmt.Sprintf("%v", fmsg.SrcPort),
+					}).
+					Add(float64(fmsg.Bytes))
+
+			} else {
+				HostTrafficIngressBytes.With(
+					prometheus.Labels{
+						"remote_ip":   net.IP(fmsg.SrcAddr).String(),
+						"remote_port": fmt.Sprintf("%v", fmsg.SrcPort),
+						"local_ip":    net.IP(fmsg.DstAddr).String(),
+						"local_port":  fmt.Sprintf("%v", fmsg.DstPort),
+					}).
+					Add(float64(fmsg.Bytes))
+			}
 		}
 	case netflow.IPFIXPacket:
 		NetFlowStats.With(

@@ -15,6 +15,20 @@ var (
 		},
 		[]string{"remote_ip", "remote_port", "local_ip", "local_port", "type"},
 	)
+	HostTrafficIngressBytes = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "host_traffic_ingress_bytes",
+			Help: "Ingress Bytes received by the host.",
+		},
+		[]string{"remote_ip", "remote_port", "local_ip", "local_port"},
+	)
+	HostTrafficEgressBytes = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "host_traffic_egress_bytes",
+			Help: "Egress Bytes received by the host.",
+		},
+		[]string{"remote_ip", "remote_port", "local_ip", "local_port"},
+	)
 	MetricTrafficPackets = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "flow_traffic_packets",
@@ -134,6 +148,9 @@ var (
 )
 
 func init() {
+	prometheus.MustRegister(HostTrafficEgressBytes)
+	prometheus.MustRegister(HostTrafficIngressBytes)
+
 	prometheus.MustRegister(MetricTrafficBytes)
 	prometheus.MustRegister(MetricTrafficPackets)
 	prometheus.MustRegister(MetricPacketSizeSum)
