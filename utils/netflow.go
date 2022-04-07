@@ -214,12 +214,16 @@ func (s *StateNetFlow) DecodeFlow(msg interface{}) error {
 			}
 		}
 		flowMessageSet, err = producer.ProcessMessageNetFlow(msgDecConv, sampling)
-		_, privateNW, _ := net.ParseCIDR("192.168.0.0/16")
+		// _, privateNW, _ := net.ParseCIDR("192.168.0.0/16")
 
 		for _, fmsg := range flowMessageSet {
 			fmsg.TimeReceived = ts
 			fmsg.SamplerAddress = samplerAddress
 			timeDiff := fmsg.TimeReceived - fmsg.TimeFlowEnd
+
+			ingress := fmsg.InIf == 10 && fmsg.OutIf != 0
+			egress := fmsg.OutIf == 10 && fmsg.InIf != 0
+
 			NetFlowTimeStatsSum.With(
 				prometheus.Labels{
 					"router":  key,
@@ -227,16 +231,15 @@ func (s *StateNetFlow) DecodeFlow(msg interface{}) error {
 				}).
 				Observe(float64(timeDiff))
 
-			// egress = 1
-			if fmsg.FlowDirection == 1 {
+			if egress {
 				HostTrafficEgressBytes.With(
 					prometheus.Labels{
 						"local_ip": net.IP(fmsg.SrcAddr).String(),
 					}).
 					Add(float64(fmsg.Bytes))
 
-			} else if privateNW.Contains(net.IP(fmsg.DstAddr)) {
-				// ingress = 0
+			}
+			if ingress {
 				HostTrafficIngressBytes.With(
 					prometheus.Labels{
 						"local_ip": net.IP(fmsg.DstAddr).String(),
